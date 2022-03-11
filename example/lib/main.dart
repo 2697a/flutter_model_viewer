@@ -15,7 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   static const String src1 =
-      'https://superd.oss-cn-beijing.aliyuncs.com/pub_upload/2022-03-04/ciawb49ie51dq3f0ho.glb';
+      'https://superd.oss-cn-beijing.aliyuncs.com/pub_upload/2022-03-09/tianxie.glb';
 
   @override
   void initState() {
@@ -36,10 +36,11 @@ class _MyAppState extends State<MyApp> {
               child: ModelViewer(
                 src: src1,
                 ar: false,
+                rotationPerSecond: "50deg",
                 autoRotate: true,
                 autoRotateDelay: 500,
                 cameraControls: true,
-                // openCache: true,
+                openCache: true,
               ),
             )
           ],

@@ -8,6 +8,6 @@
 ///
 ///  * [modelviewer.dev](https://modelviewer.dev)
 ///    for the web component this widget embeds.
-library model_viewer_v2;
+library flutter_model_viewer;
 
 export 'src/flutter_model_viewer.dart';

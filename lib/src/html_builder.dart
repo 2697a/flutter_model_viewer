@@ -97,11 +97,17 @@ abstract class HTMLBuilder {
 
     //当模型可见时通知外部
     var visibleScript =
-        'var modelViewer = document.querySelector("#toggle-model"); '
+        'var modelViewer = document.querySelector("#toggle-model");'
+        'var device = navigator.userAgent;'
+        'var isAndroid = device.indexOf("Android") > -1 || device.indexOf("Adr") > -1;'
         'modelViewer.addEventListener("model-visibility", (event) => { '
-        'ModelVisibility.postMessage(event.detail.visible); '
+        'if(isAndroid){'
+        'ModelVisibility.postMessage(event.detail.visible);'
+        '}else{'
+        'window.webkit.messageHandlers.ModelVisibility.postMessage(event.detail.visible);'
+        '}'
         '}, true);';
-    html.writeln('<script type="text/javascript">${visibleScript}</script>');
+    html.writeln('<script type="text/javascript">$visibleScript</script>');
     return html.toString();
   }
 }

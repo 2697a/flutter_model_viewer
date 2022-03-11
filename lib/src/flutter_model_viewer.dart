@@ -6,9 +6,10 @@ import 'dart:io'
     show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
 import 'dart:typed_data' show Uint8List;
 
+import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-// import 'package:flutter_android/android_content.dart' as android_content;
+import 'package:android_intent_plus/android_intent.dart' as android_content;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -142,10 +143,10 @@ class _ModelViewerState extends State<ModelViewer> {
           initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
           onWebViewCreated: (final WebViewController webViewController) async {
             _controller.complete(webViewController);
-            final host = _proxy?.address.address;
-            final port = _proxy?.port;
+            final host = _proxy!.address.address;
+            final port = _proxy!.port;
             final url = "http://$host:$port/";
-            print('>>>> ModelViewer initializing... <$url>'); // DEBUG
+            print('>>>> ModelViewer initializing... <$url>');
             await webViewController.loadUrl(url);
           },
           navigationDelegate: (final NavigationRequest navigation) async {
@@ -156,24 +157,26 @@ class _ModelViewerState extends State<ModelViewer> {
             if (!navigation.url.startsWith("intent://")) {
               return NavigationDecision.navigate;
             }
-            // try {
-              // See: https://developers.google.com/ar/develop/java/scene-viewer
-              // final intent = android_content.Intent(
-              //   action: "android.intent.action.VIEW", // Intent.ACTION_VIEW
-              //   data: Uri.parse("https://arvr.google.com/scene-viewer/1.0")
-              //       .replace(
-              //     queryParameters: <String, dynamic>{
-              //       'file': widget.src,
-              //       'mode': 'ar_only',
-              //     },
-              //   ),
-              //   package: "com.google.ar.core",
-              //   flags: 0x10000000, // Intent.FLAG_ACTIVITY_NEW_TASK,
-              // );
-              // await intent.startActivity();
-            // } catch (error) {
-              // print('>>>> ModelViewer failed to launch AR: $error'); // DEBUG
-            // }
+            try {
+              See:
+              https: //developers.google.com/ar/develop/java/scene-viewer
+              final intent = android_content.AndroidIntent(
+                action: "android.intent.action.VIEW",
+                // Intent.ACTION_VIEW
+                data: "https://arvr.google.com/scene-viewer/1.0",
+                arguments: <String, dynamic>{
+                  'file': widget.src,
+                  'mode': 'ar_only',
+                },
+                package: "com.google.ar.core",
+                flags: <int>[
+                  Flag.FLAG_ACTIVITY_NEW_TASK
+                ], // Intent.FLAG_ACTIVITY_NEW_TASK,
+              );
+              await intent.launch();
+            } catch (error) {
+              print('>>>> ModelViewer failed to launch AR: $error'); // DEBUG
+            }
             return NavigationDecision.prevent;
           },
           onPageStarted: (final String url) {
@@ -208,7 +211,7 @@ class _ModelViewerState extends State<ModelViewer> {
         name: 'ModelVisibility',
         onMessageReceived: (JavascriptMessage message) {
           setState(() {
-            loaded = message.message == 'true';
+            loaded = message.message == 'true'||message.message == '1';
           });
         });
   }
@@ -235,7 +238,7 @@ class _ModelViewerState extends State<ModelViewer> {
 
   Future<void> _initProxy() async {
     _proxy = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    _proxy?.listen((final HttpRequest request) async {
+    _proxy!.listen((final HttpRequest request) async {
       //print("${request.method} ${request.uri}"); // DEBUG
       //print(request.headers); // DEBUG
       final response = request.response;
@@ -243,8 +246,8 @@ class _ModelViewerState extends State<ModelViewer> {
       switch (request.uri.path) {
         case '/':
         case '/index.html':
-          final htmlTemplate = await rootBundle
-              .loadString('packages/flutter_model_viewer/etc/assets/template.html');
+          final htmlTemplate = await rootBundle.loadString(
+              'packages/flutter_model_viewer/etc/assets/template.html');
           final html = utf8.encode(_buildHTML(htmlTemplate));
           response
             ..statusCode = HttpStatus.ok
