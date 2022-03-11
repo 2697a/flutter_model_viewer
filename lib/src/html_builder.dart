@@ -31,8 +31,7 @@ abstract class HTMLBuilder {
     html.write(' interaction-prompt="none"');
     //设置触摸滑动方向 xy轴均可
     html.write(' touch-action="pan-x pan-y"');
-    html.write(
-        ' style="background-color: rgb(${backgroundColor.red}, ${backgroundColor.green}, ${backgroundColor.blue});"');
+    html.write(' style="background-color: rgb(${backgroundColor.red}, ${backgroundColor.green}, ${backgroundColor.blue});"');
 
     if (alt != null) {
       html.write(' alt="${htmlEscape.convert(alt)}"');
@@ -50,8 +49,7 @@ abstract class HTMLBuilder {
     }
     //是否开启自动旋转
     if (autoRotate ?? false) {
-      html.write(
-          ' auto-rotate rotation-per-second="${rotationPerSecond ?? '40deg'}"');
+      html.write(' auto-rotate rotation-per-second="${rotationPerSecond ?? '40deg'}"');
       //手指离开多久之后开始自动旋转
       if (autoRotateDelay != null) {
         html.write(' auto-rotate-delay="$autoRotateDelay"');
@@ -96,8 +94,7 @@ abstract class HTMLBuilder {
     html.writeln('</model-viewer>');
 
     //当模型可见时通知外部
-    var visibleScript =
-        'var modelViewer = document.querySelector("#toggle-model");'
+    var visibleScript = 'var modelViewer = document.querySelector("#toggle-model");'
         'var device = navigator.userAgent;'
         'var isAndroid = device.indexOf("Android") > -1 || device.indexOf("Adr") > -1;'
         'modelViewer.addEventListener("model-visibility", (event) => { '

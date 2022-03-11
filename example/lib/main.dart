@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_model_viewer/flutter_model_viewer.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -14,8 +13,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  static const String src1 =
-      'https://superd.oss-cn-beijing.aliyuncs.com/pub_upload/2022-03-09/tianxie.glb';
+  static const String src1 = 'https://superd.oss-cn-beijing.aliyuncs.com/pub_upload/2022-03-09/tianxie.glb';
 
   @override
   void initState() {

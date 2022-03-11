@@ -2,11 +2,11 @@
 
 import 'dart:async' show Completer, unawaited;
 import 'dart:convert' show utf8;
-import 'dart:io'
-    show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
+import 'dart:io' show File, HttpRequest, HttpServer, HttpStatus, InternetAddress, Platform;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:android_intent_plus/flag.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:android_intent_plus/android_intent.dart' as android_content;
@@ -107,8 +107,7 @@ class ModelViewer extends StatefulWidget {
 }
 
 class _ModelViewerState extends State<ModelViewer> {
-  final Completer<WebViewController> _controller =
-      Completer<WebViewController>();
+  final Completer<WebViewController> _controller = Completer<WebViewController>();
 
   HttpServer? _proxy;
   bool loaded = false;
@@ -146,7 +145,9 @@ class _ModelViewerState extends State<ModelViewer> {
             final host = _proxy!.address.address;
             final port = _proxy!.port;
             final url = "http://$host:$port/";
-            print('>>>> ModelViewer initializing... <$url>');
+            if (kDebugMode) {
+              print('>>>> ModelViewer initializing... <$url>');
+            }
             await webViewController.loadUrl(url);
           },
           navigationDelegate: (final NavigationRequest navigation) async {
@@ -169,22 +170,20 @@ class _ModelViewerState extends State<ModelViewer> {
                   'mode': 'ar_only',
                 },
                 package: "com.google.ar.core",
-                flags: <int>[
-                  Flag.FLAG_ACTIVITY_NEW_TASK
-                ], // Intent.FLAG_ACTIVITY_NEW_TASK,
+                flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK], // Intent.FLAG_ACTIVITY_NEW_TASK,
               );
               await intent.launch();
             } catch (error) {
-              print('>>>> ModelViewer failed to launch AR: $error'); // DEBUG
+              if (kDebugMode) {
+                print('>>>> ModelViewer failed to launch AR: $error');
+              } // DEBUG
             }
             return NavigationDecision.prevent;
           },
           onPageStarted: (final String url) {
             // print('>>>> ModelViewer began loading: <$url>'); // DEBUG
           },
-          javascriptChannels: <JavascriptChannel>{
-            getModelVisibilityJavascriptChannel()
-          },
+          javascriptChannels: <JavascriptChannel>{getModelVisibilityJavascriptChannel()},
           onPageFinished: (final String url) async {
             // print('>>>> ModelViewer finished loading: <$url>'); // DEBUG
           },
@@ -211,7 +210,7 @@ class _ModelViewerState extends State<ModelViewer> {
         name: 'ModelVisibility',
         onMessageReceived: (JavascriptMessage message) {
           setState(() {
-            loaded = message.message == 'true'||message.message == '1';
+            loaded = message.message == 'true' || message.message == '1';
           });
         });
   }
@@ -246,8 +245,7 @@ class _ModelViewerState extends State<ModelViewer> {
       switch (request.uri.path) {
         case '/':
         case '/index.html':
-          final htmlTemplate = await rootBundle.loadString(
-              'packages/flutter_model_viewer/etc/assets/template.html');
+          final htmlTemplate = await rootBundle.loadString('packages/flutter_model_viewer/etc/assets/template.html');
           final html = utf8.encode(_buildHTML(htmlTemplate));
           response
             ..statusCode = HttpStatus.ok
@@ -258,12 +256,10 @@ class _ModelViewerState extends State<ModelViewer> {
           break;
 
         case '/model-viewer.js':
-          final code = await _readAsset(
-              'packages/flutter_model_viewer/etc/assets/model-viewer.js');
+          final code = await _readAsset('packages/flutter_model_viewer/etc/assets/model-viewer.js');
           response
             ..statusCode = HttpStatus.ok
-            ..headers
-                .add("Content-Type", "application/javascript;charset=UTF-8")
+            ..headers.add("Content-Type", "application/javascript;charset=UTF-8")
             ..headers.add("Content-Length", code.lengthInBytes.toString())
             ..add(code);
           await response.close();
@@ -278,9 +274,7 @@ class _ModelViewerState extends State<ModelViewer> {
           if (url.isAbsolute && !url.isScheme("file")) {
             await response.redirect(url); // TODO: proxy the resource
           } else {
-            final data = await (url.isScheme("file")
-                ? _readFile(url.path)
-                : _readAsset(url.path));
+            final data = await (url.isScheme("file") ? _readFile(url.path) : _readAsset(url.path));
             response
               ..statusCode = HttpStatus.ok
               ..headers.add("Content-Type", "application/octet-stream")
