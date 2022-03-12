@@ -9,22 +9,26 @@ abstract class HTMLBuilder {
 
   static String build(
       {final String htmlTemplate = '',
-      required final String src,
-      final Color backgroundColor = const Color(0x00ffffff),
-      final String? rotationPerSecond,
-      final String? alt,
-      final bool? ar,
-      final List<String>? arModes,
-      final String? arScale,
-      final bool? autoRotate,
-      final int? autoRotateDelay,
-      final bool? autoPlay,
-      final bool? cameraControls,
-      final String? iosSrc}) {
+        required final String src,
+        final Color backgroundColor = const Color(0x00ffffff),
+        final String? rotationPerSecond,
+        final String? alt,
+        final bool? ar,
+        final List<String>? arModes,
+        final String? arScale,
+        final bool? autoRotate,
+        final int? autoRotateDelay,
+        final bool? autoPlay,
+        final bool? cameraControls,
+        final String? iosSrc}) {
     final html = StringBuffer(htmlTemplate);
+    html.writeln('<style scoped>*{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;}</style>');
     html.write('<model-viewer id="toggle-model"');
     //去除海报闪烁
-    html.write('  seamless-poster');
+    html.write(' seamless-poster');
+    html.write(' bounds="tight"');
+
+    html.write(' environment-image="neutral"');
     //添加3D资源
     html.write(' src="${htmlEscape.convert(src)}"');
     //关闭演示模式
@@ -97,13 +101,17 @@ abstract class HTMLBuilder {
     var visibleScript = 'var modelViewer = document.querySelector("#toggle-model");'
         'var device = navigator.userAgent;'
         'var isAndroid = device.indexOf("Android") > -1 || device.indexOf("Adr") > -1;'
+        'var isIOS = !!device.match(/\\(i[^;]+;( U;)? CPU.+Mac OS X/);'
         'modelViewer.addEventListener("model-visibility", (event) => { '
         'if(isAndroid){'
         'ModelVisibility.postMessage(event.detail.visible);'
-        '}else{'
+        '}'
+        'if(isIOS){'
         'window.webkit.messageHandlers.ModelVisibility.postMessage(event.detail.visible);'
         '}'
         '}, true);';
+    //解决H5在IOS的WebView下上拉下拉会带动整个WebView出现空白
+    visibleScript+='document.body.addEventListener("touchmove", function(e) {if(e._isScroller) return;e.preventDefault();}, {passive: false});';
     html.writeln('<script type="text/javascript">$visibleScript</script>');
     return html.toString();
   }

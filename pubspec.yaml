@@ -1,6 +1,6 @@
 name: flutter_model_viewer
 description: load glb/gltf.
-version: 0.0.2
+version: 0.0.4
 homepage: https://github.com/2697a/flutter_model_viewer
 
 environment:
